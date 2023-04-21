@@ -1,0 +1,43 @@
+version: "3.1"
+services:
+
+  mysql:
+    image: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+    env_file: ./mysql/.env
+    environment:
+      TZ: Asia/Seoul
+
+  pinpoint:
+    image: bhhan87/pinpoint
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "9991:9991"
+      - "9992:9992"
+      - "9993:9993"
+    volumes:
+      - ./pinpoint/hbase:/home/pinpoint/hbase-data
+
+  mybatis:
+    build:
+      context: ./mybatis
+    image: bhhan87/mybatis
+    ports:
+      - "8082:8080"
+    environment:
+      - MYSQL_URL=jdbc:mysql://mysql/bhhan?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=1234
+      - PINPOINT_COLLECTOR_IP=pinpoint
+      - PINPOINT_APPLICATION_NAME=mybatis
+      - PINPOINT_AGENT_ID=mybatis_1
+      - PROFILER_TRANSPORT_GRPC_COLLECTOR_IP=pinpoint
+      - PROFILER_SAMPLING_RATE=1
+    depends_on:
+      - mysql
+      - pinpoint

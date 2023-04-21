@@ -1,0 +1,13 @@
+project.apply(plugin: "io.spring.dependency-management")
+project.apply(plugin: "org.springframework.boot")
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
+    implementation 'javax.xml.bind:jaxb-api:2.3.0'
+    implementation 'com.github.javafaker:javafaker:1.0.2'
+    implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:$mybatisVersion"
+    runtimeOnly "mysql:mysql-connector-java:$mysqlConnectorVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+}

@@ -1,0 +1,77 @@
+import java.time.Duration
+
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+        classpath "com.avast.gradle:gradle-docker-compose-plugin:$dockerComposePluginVersion"
+    }
+}
+
+apply plugin: 'docker-compose'
+
+subprojects {
+    apply plugin: "java"
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+
+        dependencies {
+            compileOnly "org.projectlombok:lombok:$lombokVersion"
+            annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        }
+    }
+}
+
+dockerCompose {
+    removeOrphans = true
+    retainContainersOnStartupFailure = true
+    dockerComposeStopTimeout = Duration.ofSeconds(1)
+
+    mysql {
+        projectName = null
+        useComposeFiles = ["docker-compose.yml"]
+        startedServices = ["mysql"]
+    }
+
+    pinpoint {
+        projectName = null
+        useComposeFiles = ["docker-compose.yml"]
+        startedServices = ["pinpoint"]
+    }
+
+    application {
+        projectName = null
+        useComposeFiles = ["docker-compose.yml"]
+        startedServices = ["mybatis"]
+    }
+
+    server {
+        projectName = null
+        useComposeFiles = ["docker-compose.yml"]
+        startedServices = ["mybatis"]
+    }
+
+    infra {
+        projectName = null
+        useComposeFiles = ["docker-compose.yml"]
+        startedServices = ["mysql", "pinpoint"]
+    }
+}
+
+subprojects.each {
+    if(it.name.startsWith("mybatis")) {
+        applicationComposeUp.dependsOn(":" + it.name + ":assemble")
+        serverComposeUp.dependsOn(":" + it.name + ":assemble")
+    }
+}
+
+applicationComposeUp.dependsOn(infraComposeUp)
+applicationComposeDown.dependsOn(infraComposeDown)

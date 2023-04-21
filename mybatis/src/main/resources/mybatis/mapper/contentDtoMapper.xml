@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.bhhan.dao.ContentMapper">
+    <select id="getContents" resultMap="contentDtoResultMap">
+        SELECT
+        c.content_id,
+        c.description as content_description,
+        c.subject as content_subject,
+        c.issued_at as content_issuedAt,
+        m.comment_id,
+        m.description as comment_description,
+        m.subject as comment_subject,
+        m.issued_at as comment_issuedAt
+        FROM contents c
+        INNER JOIN comments m ON c.content_id = m.content_id
+    </select>
+
+    <select id="getContentById" resultMap="contentDtoResultMap" parameterType="long">
+        SELECT
+            c.content_id,
+            c.description as content_description,
+            c.subject as content_subject,
+            c.issued_at as content_issuedAt,
+            m.comment_id,
+            m.description as comment_description,
+            m.subject as comment_subject,
+            m.issued_at as comment_issuedAt
+        FROM contents c
+                 INNER JOIN comments m ON c.content_id = m.content_id
+        WHERE c.content_id = #{contentId}
+    </select>
+
+    <resultMap id="contentDtoResultMap" type="io.github.bhhan.dao.ContentDto">
+        <id column="content_id" property="contentId" />
+        <result column="content_description" property="description" />
+        <result column="content_subject" property="subject" />
+        <result column="content_issuedAt" property="issuedAt" />
+        <collection property="comments" javaType="java.util.ArrayList"
+                    ofType="io.github.bhhan.dao.CommentDto" resultMap="commentDtoResultMap" />
+    </resultMap>
+
+    <resultMap id="commentDtoResultMap" type="io.github.bhhan.dao.CommentDto">
+        <id column="comment_id" property="commentId" />
+        <result column="comment_description" property="description" />
+        <result column="comment_subject" property="subject" />
+        <result column="comment_issuedAt" property="issuedAt" />
+    </resultMap>
+</mapper>
